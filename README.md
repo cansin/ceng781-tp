@@ -29,7 +29,7 @@ server. In `h2`'s xterm, start the server:
    ```bash
    python -m client.sender 10.0.2.2 "BlindBox is cool"
    ```
-   The message will be received.
+   The message will be received. 
 5. Type `exit` to leave each xterm and the Mininet command line.
    Then, to stop mininet:
    ```bash
