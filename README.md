@@ -1,5 +1,7 @@
 # CENG 781 - Network Security - Term Project
 
+Before you start, make sure you install `pycrypto` via `pip install pycrypto`.
+
 Let's compile `blindbox.p4` and bring
 up a switch in Mininet to test its behavior.
 
