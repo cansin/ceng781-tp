@@ -1,4 +1,5 @@
 \documentclass{winslabreport}
+\usepackage{hyperref}
 \reporttitle{An Implementation of BlindBox: Deep Packet Inspection
 over Encrypted Traffic}
 \coursename{CENG781 Network Security}
@@ -19,20 +20,18 @@ over Encrypted Traffic}
 
 \section{Introduction}
 
-Deep Packet Inspection (DPI), which is the computer network filtering technique, controls the content of the traffic and traffic flow \cite{Deep}. DPI is used in several areas such that protection to security threats, lawful interception, parental filtering. There are middleboxes to provide the functionality of DPI. In other words, Middleboxes should ensure security. However, there is a problem with some middleboxes: while providing security, they do not put emphasis on privacy. BlindBox, which is a middlebox presented in this report, provide both functionality of the DPI and privacy of the packets. If the BlindBox is used as middlebox, there is no need to decrypt the payload. Inspecting packets is made over encrypted payload. 
+Deep Packet Inspection (DPI), which is the computer network filtering technique, controls the content of the traffic and traffic flow \cite{Deep}. DPI is used in several areas such that protection to security threats, lawful interception, parental filtering. There are different middlebox approaches to provide the functionality of DPI. However, all of the existing approaches have one fundamental problem: while providing security, they do not put emphasis on privacy. BlindBox \cite{Blindbox}, which is a middlebox presented in this report, provide both functionality of the DPI and privacy of the packets. If the BlindBox is used as middlebox, there is no need to decrypt the payload. Inspecting packets is made over encrypted payload. 
 
 BlindBox ensures the following properties:
 
 \begin{itemize}
-	\item As all middleboxes do, BlindBox seek for suspicious content for security. 
-	\item Sender and receiver do not have knowledge of the rule.
-	\item BlindBox should have at least one trusted endpoint as in intrusion detection (IDS). 
-	\item There is no permission for BlindBox to read the traffic unless there is no found suspicious content.
+	\item It seeks for suspicious content for security. 
+	\item Sender and receiver do not have an idea what the rules are.
+	\item It must have at least one trusted endpoint as in intrusion detection (IDS). 
+	\item It does not decrypt the actual payload, so the privacy is not compromised.
 \end{itemize}
 
-The last property is special for BlindBox, other middleboxes does not provide it.
-
-Below figure shows how BlindBox works:
+The last property is the main difference between BlindBox, other similar middleboxes that aim for DPI. \autoref{fig:bli1} outlines how BlindBox works.
 
 \begin{figure}[H]
 	\centering
@@ -59,7 +58,7 @@ When the traffic comes to the receiver, it is decrypted and receiver authenticat
 
 \section{Related Work}
 
-There are many related works on middleboxes. Some of them are accepted insecure. As explained in \cite{SSL} , man in the middle attack is built using counterfeit certificates on SSL by some systems. In that way, security of the SSL could be broken, and middlebox can decrypt the traffic for detection scan. That is, E2E security of SSL is destroyed which is insecure. In addition, there is a system called Meddle \cite{Traffic}. Its goal is to increase transparency in mobile networks. This is done by endpoints and the third-party are authorized to control the traffic, which is not required in BlindBox. The systems APLOMB \cite{Network} and Beyond the Radio \cite{48} are similar to Meddle.
+There are many related works on middleboxes. Some of them are considered insecure. As explained in \cite{SSL}, man in the middle attack is built using counterfeit certificates on SSL by some systems. In that way, security of the SSL could be broken, and middlebox can decrypt the traffic for detection scan. That is, E2E security of SSL is destroyed which is insecure. In addition, there is a system called Meddle \cite{Traffic}. Its goal is to increase transparency in mobile networks. This is done by endpoints and the third-party are authorized to control the traffic, which is not required in BlindBox. The systems APLOMB \cite{Network} and Beyond the Radio \cite{48} are similar to Meddle.
 
 Some middleboxes use encrypted payload for detection. But, they have some properties that are not required for BlindBox. For example,  fully homomorphic encryption\cite{24} and general functional encryption \cite{23} can be used in order to encrypt the payload. Their computation speed is so slow when they are compared with an encryption scheme used in BlindBox.
 
@@ -77,7 +76,7 @@ After a short evaluation, we got more comfortable with the language and decided 
 
 We realized there are multiple moving parts for a P4 project. The \emph{topology.json} and \emph{*runtime.json} files together define the network setup for Mininet \cite{Lantz:2010:NLR:1868447.1868466}, while the main \emph{*.p4} file contains the middlebox implementation. In order to simplify the network setup, we stripped down the \emph{*.json} files to have a directed minimal 2-client-1-switch setup.
 
-Later we incorporated a \emph{TCP} header extraction step to the parser. In order to do so, we simply introduced a new header type \emph{tcp\_t}, and added a new \emph{tcp} header section to our \emph{headers} struct with the type. Parsing this new header was as simple as introducing a new \emph{parse\_tcp} state to our parser and emitting it back in deparser, as shown in \ref{lst:parser}.
+Later we incorporated a \emph{TCP} header extraction step to the parser. In order to do so, we simply introduced a new header type \emph{tcp\_t}, and added a new \emph{tcp} header section to our \emph{headers} struct with the type. Parsing this new header was as simple as introducing a new \emph{parse\_tcp} state to our parser and emitting it back in deparser, as shown in \autoref{lst:parser}.
 
 \begin{lstlisting}[caption={P4 parser snippet},label={lst:parser},language=C]
 const bit<8> TYPE_TCP = 0x06;
@@ -105,7 +104,7 @@ packet.emit(hdr.tcp);
 
 We also spent some time working on the given client code by the exercise. Since the backbone of the BlindBox implementation relies heavily on \emph{AES}, we decided to augment the given sender/receiver pair to encrypt/decrypt the message sent over. In order to do so, we first converted the Python implementation to be package-based in order to utilize a shared \emph{aes.py} code by both the sender and the receiver. 
 
-Having such a single implementation was needed in order to have a shared \emph{key} and \emph{initial\_value} between the receiver and the sender, and also to centralize the effort needed in order to pad given messages' length to be a multiple of 16 (which is a requirement for AES). As shown in \ref{lst:aes}, we utilized \emph{pycrypto} library for AES implementation.
+Having such a single implementation was needed in order to have a shared \emph{key} and \emph{initial\_value} between the receiver and the sender, and also to centralize the effort needed in order to pad given messages' length to be a multiple of 16 (which is a requirement for AES). As shown in \autoref{lst:aes}, we utilized \emph{pycrypto} library for AES implementation.
 
 \begin{lstlisting}[caption={AES encryption/decryption},label={lst:aes},language=Python]
 import math
