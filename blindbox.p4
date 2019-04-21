@@ -170,9 +170,9 @@ control MyIngress(inout headers hdr,
             if (
                 hdr.tcp.isValid() && hdr.blindbox.isValid() &&
                 (
-                    hdr.blindbox.token == 128w0xccae4eaf7ca9067ac624a685346ee50a /* Istanbul */ ||
-                    hdr.blindbox.token == 128w0xe5023ce95e57f223157af549873cea49 /* Ankara */ ||
-                    hdr.blindbox.token == 128w0xe5023ce95e57f223157af549873cea49 /* Izmir */
+                    hdr.blindbox.token == 128w0x52a5671d0308d078677f22f6f824a4b2 /* Istanbul */ ||
+                    hdr.blindbox.token == 128w0x4c297e2a44c3f79de293621340f81688 /* Ankara */ ||
+                    hdr.blindbox.token == 128w0x71d1c39bd47437f0cc74c2f5f2c8e30a /* Izmir */
                 )
             ) {
                 drop();

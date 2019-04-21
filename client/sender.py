@@ -5,7 +5,7 @@ import sys
 from scapy.all import sendp, get_if_list, get_if_hwaddr
 from scapy.layers.inet import Ether, IP, TCP
 
-from .aes import encrypt
+from .aes import encrypt, token
 from .blindbox import BlindBox
 
 
@@ -35,14 +35,12 @@ def main():
     for i in range(len(sys.argv[1])):
         pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
         pkt = pkt / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152, 65535)) / BlindBox(
-            token=encrypt(sys.argv[1][i:i + 8]))
-        # pkt.show2()
+            token=token(sys.argv[1][i:i + 8]))
         sendp(pkt, iface=iface, verbose=False)
 
     print "Sending on interface %s to %s" % (iface, str(addr))
     pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
     pkt = pkt / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152, 65535)) / encrypt(sys.argv[1])
-    # pkt.show2()
     sendp(pkt, iface=iface, verbose=False)
 
 

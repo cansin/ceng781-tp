@@ -1,7 +1,7 @@
 import binascii
 import sys
 
-from .aes import encrypt
+from .aes import token
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
         print 'pass 1 arguments: "<message>"'
         exit(1)
 
-    cipher_text = encrypt(sys.argv[1])
+    cipher_text = token(sys.argv[1])
     print "128w0x" + binascii.hexlify(cipher_text)
 
 

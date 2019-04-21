@@ -7,7 +7,7 @@ from scapy.all import sniff, get_if_list
 from scapy.layers.inet import IPOption, TCP, _IPOption_HDR
 
 from client.blindbox import TYPE_BLINDBOX
-from .aes import encrypt, decrypt
+from .aes import token, decrypt
 
 
 def get_if():
@@ -49,7 +49,7 @@ class BlindBoxSession:
     def validate(self, payload):
         print "Validating session"
         for i in range(len(payload)):
-            self.generated_tokens.append(encrypt(payload[i:i + 8]))
+            self.generated_tokens.append(token(payload[i:i + 8]))
 
         self.is_valid = self.received_tokens == self.generated_tokens
 
