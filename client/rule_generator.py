@@ -1,5 +1,4 @@
 import binascii
-import struct
 import sys
 
 from .aes import encrypt

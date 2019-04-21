@@ -1,13 +1,13 @@
+import binascii
 import os
 import struct
-import sys
 
 from scapy.all import ShortField, IntField, FieldListField, FieldLenField
 from scapy.all import sniff, get_if_list
 from scapy.layers.inet import IPOption, TCP, _IPOption_HDR
 
 from client.blindbox import TYPE_BLINDBOX
-from .aes import decrypt
+from .aes import encrypt, decrypt
 
 
 def get_if():
@@ -37,23 +37,44 @@ class IPOption_MRI(IPOption):
                                   length_from=lambda pkt: pkt.count * 4)]
 
 
-def handle_pkt(pkt):
-    if TCP in pkt:
-        print "got a packet"
-        # pkt.show2()
-        sys.stdout.flush()
+class BlindBoxSession:
+    def __init__(self):
+        self.received_tokens = []
+        self.generated_tokens = []
+        self.is_valid = True
 
+    def add_token(self, token):
+        self.received_tokens.append(token)
+
+    def validate(self, payload):
+        print "Validating session"
+        for i in range(len(payload)):
+            self.generated_tokens.append(encrypt(payload[i:i + 8]))
+
+        self.is_valid = self.received_tokens == self.generated_tokens
+
+
+session = BlindBoxSession()
+
+
+def handle_pkt(pkt):
+    global session
+    if TCP in pkt:
         if ('\x00' + bytes(pkt[TCP].payload)[:3]) == struct.pack(">L", TYPE_BLINDBOX):
-            print "a BlindBox packet with payload %s" % decrypt(str(pkt[TCP].payload)[3:])
+            token = str(pkt[TCP].payload)[3:]
+            session.add_token(token)
+            print "Got a BlindBox packet with token %s" % ("128w0x" + binascii.hexlify(token))
         else:
-            print "a TCP packet with payload %s" % decrypt(str(pkt[TCP].payload))
+            payload = decrypt(str(pkt[TCP].payload))
+            session.validate(payload)
+            print "Got a %s TCP packet with payload \"%s\"" % ("VALID" if session.is_valid else "MALICIOUS", payload)
+            session = BlindBoxSession()
 
 
 def main():
     ifaces = filter(lambda i: 'eth' in i, os.listdir('/sys/class/net/'))
     iface = ifaces[0]
-    print "sniffing on %s" % iface
-    sys.stdout.flush()
+    print "Sniffing on %s" % iface
     sniff(iface=iface,
           prn=lambda x: handle_pkt(x))
 

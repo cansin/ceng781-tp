@@ -149,7 +149,7 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl -1;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     table ipv4_lpm {
@@ -167,9 +167,14 @@ control MyIngress(inout headers hdr,
 
     apply {
         if (hdr.ipv4.isValid()){
-            if (hdr.tcp.isValid() && hdr.blindbox.isValid() &&
-                // Drop token packet if value is "Istanbul"
-                hdr.blindbox.token == 128w0xccae4eaf7ca9067ac624a685346ee50a){
+            if (
+                hdr.tcp.isValid() && hdr.blindbox.isValid() &&
+                (
+                    hdr.blindbox.token == 128w0xccae4eaf7ca9067ac624a685346ee50a /* Istanbul */ ||
+                    hdr.blindbox.token == 128w0xe5023ce95e57f223157af549873cea49 /* Ankara */ ||
+                    hdr.blindbox.token == 128w0xe5023ce95e57f223157af549873cea49 /* Izmir */
+                )
+            ) {
                 drop();
                 return;
             }
