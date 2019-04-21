@@ -11,7 +11,7 @@ from .aes import decrypt
 def get_if():
     ifs = get_if_list()
     iface = None
-    for i in get_if_list():
+    for i in ifs:
         if "eth0" in i:
             iface = i
             break;
