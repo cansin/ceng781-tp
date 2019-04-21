@@ -15,7 +15,7 @@ def get_if():
     for i in ifs:
         if "eth0" in i:
             iface = i
-            break;
+            break
     if not iface:
         print "Cannot find eth0 interface"
         exit(1)
@@ -41,7 +41,7 @@ def main():
     for i in range(len(sys.argv[1])):
         pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
         pkt = pkt / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152, 65535)) / BlindBox(
-            token=encrypt(sys.argv[1][i:i + 16]))
+            token=encrypt(sys.argv[1][i:i + 8]))
         # pkt.show2()
         sendp(pkt, iface=iface, verbose=False)
 

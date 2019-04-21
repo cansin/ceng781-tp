@@ -1,3 +1,5 @@
+import binascii
+import struct
 import sys
 
 from .aes import encrypt
@@ -11,7 +13,7 @@ def main():
         exit(1)
 
     cipher_text = encrypt(sys.argv[1])
-    print cipher_text.encode('hex')
+    print "128w0x" + binascii.hexlify(cipher_text)
 
 
 if __name__ == '__main__':
