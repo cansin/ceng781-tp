@@ -4,6 +4,7 @@
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> TYPE_TCP = 0x06;
+const bit<24> TYPE_BLINDBOX = 0x811ad8;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -46,6 +47,11 @@ header tcp_t {
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
+    bit<24> protocol;
+}
+
+header blindbox_t {
+    bit<128> token;
 }
 
 struct metadata {
@@ -56,6 +62,7 @@ struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
     tcp_t        tcp;
+    blindbox_t   blindbox;
 }
 
 /*************************************************************************
@@ -89,6 +96,14 @@ parser MyParser(packet_in packet,
 
     state parse_tcp {
         packet.extract(hdr.tcp);
+        transition select(hdr.tcp.protocol) {
+            TYPE_BLINDBOX: parse_blindbox;
+            default: accept;
+        }
+    }
+
+    state parse_blindbox {
+        packet.extract(hdr.blindbox);
         transition accept;
     }
 
@@ -98,7 +113,7 @@ parser MyParser(packet_in packet,
 ************   C H E C K S U M    V E R I F I C A T I O N   *************
 *************************************************************************/
 
-control MyVerifyChecksum(inout headers hdr, inout metadata meta) {   
+control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply {  }
 }
 
@@ -113,14 +128,14 @@ control MyIngress(inout headers hdr,
     action drop() {
         mark_to_drop();
     }
-    
+
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
-    
+
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -133,7 +148,7 @@ control MyIngress(inout headers hdr,
         size = 1024;
         default_action = drop();
     }
-    
+
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
@@ -184,6 +199,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
+        packet.emit(hdr.blindbox);
     }
 }
 

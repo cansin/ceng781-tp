@@ -1,10 +1,12 @@
 import os
+import struct
 import sys
 
 from scapy.all import ShortField, IntField, FieldListField, FieldLenField
 from scapy.all import sniff, get_if_list
 from scapy.layers.inet import IPOption, TCP, _IPOption_HDR
 
+from client.blindbox import TYPE_BLINDBOX
 from .aes import decrypt
 
 
@@ -36,12 +38,15 @@ class IPOption_MRI(IPOption):
 
 
 def handle_pkt(pkt):
-    if TCP in pkt and pkt[TCP].dport == 1234:
+    if TCP in pkt:
         print "got a packet"
-        pkt.show2()
+        # pkt.show2()
         sys.stdout.flush()
 
-        print "payload %s" % decrypt(str(pkt[TCP].payload))
+        if ('\x00' + bytes(pkt[TCP].payload)[:3]) == struct.pack(">L", TYPE_BLINDBOX):
+            print "a BlindBox packet with payload %s" % decrypt(str(pkt[TCP].payload)[3:])
+        else:
+            print "a TCP packet with payload %s" % decrypt(str(pkt[TCP].payload))
 
 
 def main():
