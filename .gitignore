@@ -5,3 +5,4 @@ build/
 pcaps/
 logs/
 .texpadtmp/
+.idea/
