@@ -14,30 +14,32 @@
 # limitations under the License.
 #
 
-import sys, os, tempfile, socket
+import os
+import tempfile
 from time import sleep
 
-from mininet.node import Switch
-from mininet.moduledeps import pathCheck
 from mininet.log import info, error, debug
+from mininet.moduledeps import pathCheck
+from mininet.node import Switch
 
-from p4_mininet import P4Switch, SWITCH_START_TIMEOUT
 from netstat import check_listening_on_port
+from p4_mininet import P4Switch, SWITCH_START_TIMEOUT
+
 
 class P4RuntimeSwitch(P4Switch):
     "BMv2 switch with gRPC support"
     next_grpc_port = 50051
     next_thrift_port = 9090
 
-    def __init__(self, name, sw_path = None, json_path = None,
-                 grpc_port = None,
-                 thrift_port = None,
-                 pcap_dump = False,
-                 log_console = False,
-                 verbose = False,
-                 device_id = None,
-                 enable_debugger = False,
-                 log_file = None,
+    def __init__(self, name, sw_path=None, json_path=None,
+                 grpc_port=None,
+                 thrift_port=None,
+                 pcap_dump=False,
+                 log_console=False,
+                 verbose=False,
+                 device_id=None,
+                 enable_debugger=False,
+                 log_file=None,
                  **kwargs):
         Switch.__init__(self, name, **kwargs)
         assert (sw_path)
@@ -88,7 +90,6 @@ class P4RuntimeSwitch(P4Switch):
             P4Switch.device_id += 1
         self.nanomsg = "ipc:///tmp/bm-{}-log.ipc".format(self.device_id)
 
-
     def check_switch_started(self, pid):
         for _ in range(SWITCH_START_TIMEOUT * 2):
             if not os.path.exists(os.path.join("/proc", str(pid))):
@@ -124,7 +125,6 @@ class P4RuntimeSwitch(P4Switch):
         cmd = ' '.join(args)
         info(cmd + "\n")
 
-
         pid = None
         with tempfile.NamedTemporaryFile() as f:
             self.cmd(cmd + ' >' + self.log_file + ' 2>&1 & echo $! >> ' + f.name)
@@ -134,4 +134,3 @@ class P4RuntimeSwitch(P4Switch):
             error("P4 switch {} did not start correctly.\n".format(self.name))
             exit(1)
         info("P4 switch {} has been started.\n".format(self.name))
-

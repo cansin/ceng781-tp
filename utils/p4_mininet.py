@@ -13,19 +13,19 @@
 # limitations under the License.
 #
 
-from mininet.net import Mininet
-from mininet.node import Switch, Host
-from mininet.log import setLogLevel, info, error, debug
-from mininet.moduledeps import pathCheck
-from sys import exit
 import os
 import tempfile
-import socket
+from sys import exit
 from time import sleep
+
+from mininet.log import info, error, debug
+from mininet.moduledeps import pathCheck
+from mininet.node import Switch, Host
 
 from netstat import check_listening_on_port
 
-SWITCH_START_TIMEOUT = 10 # seconds
+SWITCH_START_TIMEOUT = 10  # seconds
+
 
 class P4Host(Host):
     def config(self, **params):
@@ -47,29 +47,30 @@ class P4Host(Host):
     def describe(self):
         print "**********"
         print self.name
-        print "default interface: %s\t%s\t%s" %(
+        print "default interface: %s\t%s\t%s" % (
             self.defaultIntf().name,
             self.defaultIntf().IP(),
             self.defaultIntf().MAC()
         )
         print "**********"
 
+
 class P4Switch(Switch):
     """P4 virtual switch"""
     device_id = 0
 
-    def __init__(self, name, sw_path = None, json_path = None,
-                 thrift_port = None,
-                 pcap_dump = False,
-                 log_console = False,
-                 log_file = None,
-                 verbose = False,
-                 device_id = None,
-                 enable_debugger = False,
+    def __init__(self, name, sw_path=None, json_path=None,
+                 thrift_port=None,
+                 pcap_dump=False,
+                 log_console=False,
+                 log_file=None,
+                 verbose=False,
+                 device_id=None,
+                 enable_debugger=False,
                  **kwargs):
         Switch.__init__(self, name, **kwargs)
-        assert(sw_path)
-        assert(json_path)
+        assert (sw_path)
+        assert (json_path)
         # make sure that the provided sw_path is valid
         pathCheck(sw_path)
         # make sure that the provided JSON file exists
@@ -158,8 +159,8 @@ class P4Switch(Switch):
 
     def attach(self, intf):
         "Connect a data port"
-        assert(0)
+        assert (0)
 
     def detach(self, intf):
         "Disconnect a data port"
-        assert(0)
+        assert (0)

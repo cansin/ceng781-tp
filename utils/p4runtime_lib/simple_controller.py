@@ -26,6 +26,7 @@ import helper
 def error(msg):
     print >> sys.stderr, ' - ERROR! ' + msg
 
+
 def info(msg):
     print >> sys.stdout, ' - ' + msg
 
@@ -133,9 +134,9 @@ def program_switch(addr, device_id, sw_conf_file, workdir, proto_dump_fpath):
 
 def insertTableEntry(sw, flow, p4info_helper):
     table_name = flow['table']
-    match_fields = flow.get('match') # None if not found
+    match_fields = flow.get('match')  # None if not found
     action_name = flow['action_name']
-    default_action = flow.get('default_action') # None if not found
+    default_action = flow.get('default_action')  # None if not found
     action_params = flow['action_params']
     priority = flow.get('priority')  # None if not found
 

@@ -20,6 +20,7 @@ from p4.config import p4info_pb2
 
 from convert import encode
 
+
 class P4InfoHelper(object):
     def __init__(self, p4_info_filepath):
         p4info = p4info_pb2.P4Info()
@@ -145,7 +146,8 @@ class P4InfoHelper(object):
                     elif id is not None:
                         if p.id == id:
                             return p
-        raise AttributeError("action %r has no param %r, (has: %r)" % (action_name, name if name is not None else id, a.params))
+        raise AttributeError(
+            "action %r has no param %r, (has: %r)" % (action_name, name if name is not None else id, a.params))
 
     def get_action_param_id(self, action_name, param_name):
         return self.get_action_param(action_name, name=param_name).id

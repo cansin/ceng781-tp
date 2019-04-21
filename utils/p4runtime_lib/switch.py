@@ -25,9 +25,11 @@ MSG_LOG_MAX_LEN = 1024
 # List of all active connections
 connections = []
 
+
 def ShutdownAllSwitchConnections():
     for c in connections:
         c.shutdown()
+
 
 class SwitchConnection(object):
 
@@ -66,7 +68,7 @@ class SwitchConnection(object):
         else:
             self.requests_stream.put(request)
             for item in self.stream_msg_resp:
-                return item # just one
+                return item  # just one
 
     def SetForwardingPipelineConfig(self, p4info, dry_run=False, **kwargs):
         device_config = self.buildDeviceConfig(**kwargs)
@@ -157,6 +159,7 @@ class GrpcRequestLogger(grpc.UnaryUnaryClientInterceptor,
     def intercept_unary_stream(self, continuation, client_call_details, request):
         self.log_message(client_call_details.method, request)
         return continuation(client_call_details, request)
+
 
 class IterableQueue(Queue):
     _sentinel = object()
