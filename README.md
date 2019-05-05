@@ -31,10 +31,15 @@ server. In `h2`'s xterm, start the server:
    ```
 5. In `h1`'s xterm, send a message to `h2`:
    ```bash
-   python -m client.sender "BlindBox is cool"
+   python -m client.sender "This is a safe message."
    ```
    The message will be received. 
-6. Type `exit` to leave each xterm and the Mininet command line.
+6. In `h1`'s xterm, send a message to `h2`:
+   ```bash
+   python -m client.sender "This is a malicious message."
+   ```
+   The message will be received but will be marked as _malicious_. 
+7. Type `exit` to leave each xterm and the Mininet command line.
    Then, to stop mininet:
    ```bash
    make stop
