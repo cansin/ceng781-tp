@@ -9,7 +9,7 @@ INITIAL_VALUE = '6C0AF5F86C504961'
 
 def token(text):
     h = MD5.new()
-    h.update(encrypt(text))
+    h.update(encrypt(text[:8]))
     return h.digest()
 
 
