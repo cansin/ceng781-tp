@@ -16,8 +16,8 @@ up a switch in Mininet to test its behavior.
    This will:
    * compile `blindbox.p4`, and
    * start a Mininet instance with a single switch (`s1`), connecting three hosts  
-     (`h1`, `h2`, and `h3`).
-   * The hosts are assigned IPs of `10.0.1.1`, `10.0.2.2`, and `10.0.3.3`.
+     (`h1`, and `h2`).
+   * The hosts are assigned IPs of `10.0.1.1`, and `10.0.2.2`.
 
 3. You should now see a Mininet command prompt. Open two terminals
 for `h1` and `h2`, respectively:
