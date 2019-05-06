@@ -90,27 +90,36 @@ When the traffic comes to the receiver, it is decrypted and receiver authenticat
 
 \section{Main Contributions} \label{maincontributions}
 
-In this section, the details of how BlindBox works is explained, which sheds a light on the main contributions the paper provides for the field. There are three separate BlindBox protocols: Basic Detection, Limited IDS, and Full IDS with probable cause privacy. Basic Detection Protocol is the core of the BlindBox. The last two protocols are an extended version of the first one. Since our naive implementation is based on the Basic Detection protocol, the remainder of this section is focused on explaining the details of that variant.
+In this section, details of how BlindBox works is explained, which sheds light on the main contributions the paper provides for the field. There are three different BlindBox protocols: Basic Detection, Limited IDS, and Full IDS with probable cause privacy. Basic Detection Protocol is the core of the BlindBox. The last two protocols are an extended version of the first one, so the first protocol is explained to understand deeply BlindBox.
+  
+The main idea of BlindBox is to scan the encrypted text in order to detect whether there is a malicious word or not. Normally, for doing word detection, searchable encryption can be used. However, there are two reasons why it is not feasible for BlindBox scheme. The first reason is in Searchable Encryption, rules are seen by endpoints which are not the case for BlindBox. The second reason is searchable encryption schemes such as deterministic and randomized schemes lead to security problems or time-wise problems. BlindBox uses DPIEnc for encryption and BlindBox Detect for detection protocol. DPIEnc and BlindBox Detect deal with these time-wise and security problems.
 
-BlindBox Basic Detection Protocol scans the encrypted text to detect whether there is a malicious word or not. Normally, for doing word detection, searchable encryption can be used. However, there are two reasons why it is not feasible for BlindBox scheme. The first reason is in Searchable Encryption, rules are seen by endpoints which are not the case for BlindBox. The second reason is searchable encryption schemes such as deterministic and randomized schemes lead to security problems or time-wise problems. BlindBox Basic Detection Protocol uses DPIEnc for encryption and BlindBox Detect for detection protocol. DPIEnc and BlindBox Detect deal with these time-wise and security problems.
+At the beginning of this protocol, traffic is tokenized. Since window-based tokenization algorithm increases bandwidth, Blind Box uses delimiter-based tokenization which satisfies to rule out the unnecessary word by taking delimiters like punctuation, symbols, etc. as a consideration.
 
-At the beginning of this protocol, traffic is tokenized. Since window-based algorithm increases bandwidth.  BlindBox uses delimiter-based tokenization which satisfies to rule out the unnecessary word by taking delimiters like punctuation, symbols, etc. as a consideration.
-
-The next step in this protocol is encrypting the tokens, called DPIEnc scheme. 
-
+The next step in this protocol is encrypting the tokens, called DPIEnc scheme: 
 \begin{center}
-	$Enc_k(salt,t)= salt, AES_(AES_k(t))(salt) \mod RS$
-\end{center}
+	$Enc_k(salt,t)= salt, \textbf{AES}_{AES_k(t)}(salt) \mod RS$
+\end{center} Salt and AES function which is shown in bold is used to randomize the encryption. The reason to use AES to randomize is that AES is faster than other random functions such as SHA-1. Secondly, taking modulo RS reduces the bandwidth.
 
-Salt and AES function which is shown in blue is used to randomize the encryption. The reason to use AES to randomize is that AES is faster than other random functions such as SHA-1. Also, taking modulo RS reduces the bandwidth. Next step is detection a collision between a word $r$ and encrypted token $t$. First, BlindBox find $AES_(AES_k(r))(salt) \mod RS$ using salt. Then it checks whether there is a match with $AES_(AES_k(t))(salt) \mod RS$. This has to be done for each $t$ and $r$, so this makes the scheme infeasible. In order to process the detection in logarithmic time, BlindBox Detect scheme is used. Firstly, BlindBox generates a table in which each word $r$ corresponds to how many times this word $r$ is occurred in the traffic, called $ct_r$. Also, BlindBox generates a search tree which calculates $Enc_k(salt_0+ct_r,r)$ for each $r$. If BlindBox see a match between $r$ and $Enc_k(salt,t)$ which is sent by sender , it increase the counter $ct_r$ by 1. Then BlindBox computes new encryption $Enc_k(salt_0+ct_r,r)$ based on new $ct_r$.  Next, old values are deleted, and new encryption values are inserted into the tree.
+Next step is detection a collision between a word $r$ and encrypted token $t$. BlindBox find $AES_{AES_k(r)}(salt) \mod RS$ using salt. Then it checks whether there is a match with $AES_{AES_k(t)}(salt) \mod RS$. This has to be done for each $t$ and $r$, so this makes the scheme infeasible. In order to process the detection in logarithmic time, BlindBox Detect scheme is used. Firstly, BlindBox generates a table in which each word $r$ corresponds to how many times this word $r$ is occurred in the traffic, called $ct_r^*$. Also, BlindBox generates a search tree which calculates $Enc_k(salt_0+ct_r^*,r)$ for each $r$. If BlindBox see a match between $r$ and $Enc_k(salt,t)$ which is sent by sender , it increase the counter $ct_r^*$ by 1. Then BlindBox computes new encryption $Enc_k(salt_0+ct_r^*,r)$ based on new $ct_r^*$.  Next, old values are deleted, and new encryption values is inserted into the tree.
+  
+The difference between BlindBox and other middleboxes is that BlindBox does not need to decrypt the traffic to detect malicious words. To achieve this, the key has to be known by only sender and receiver, and rules have to be known by only BlindBox. Obfuscated function $ObfAES_k$  is used to do so. In BlindBox scheme, this obfuscation is implemented with Yao's\cite{chi,chii} garbled circuits. At the end, BlindBox can process $AES_k(r)$ for each rule $r$ without knowing $k$. 
 
-The difference between BlindBox and other middleboxes is that BlindBox does not need to decrypt the traffic to detect malicious words. To achieve this, the key has to be known by only sender and receiver, and rules have to be known by only BlindBox. Obfuscated function $ObfAES_k$ function is used to do so. In BlindBox scheme, this obfuscation is implemented with Yao’s\cite{chi,chii} garbled circuits. At the end, BlindBox can process $AES_k(r)$ for each rule $r$ without knowing $k$. 
+As a final step, the following process is done  at the receiver part:
+\begin{itemize}
+    \item The traffic which is coming from the sender is decrypted is using SSL.
+    \item Same tokenization and encryption process, a sender does, is done.
+    \item Each encrypted tokens which are computed at receiver and coming from BlindBox are compared. 
+    \item If they are not the same sender could be malicious.
+\end{itemize}
+
+To sum up, In this section, we explain tokenization, encryption, detection, rule preparation, and token validation, as shown in figure 1, which are methods of Sherry \cite{BlindBox} and colleagues. In the next section, our naive approach based on Sherry's is explained.
 
 \section{Results and Discussion}
 
 \subsection{Methodology} \label{methodology}
 
-Our naive BlindBox implementation is based on the Basic Detection Protocal explained in Section \ref{maincontributions}. As described by the main BlindBox paper, we first use a sliding window technique in order to create 8-byte long tokens of a given message that is being transferred to the receiving client. For example, if the message is "Ankara rocks!", the sending client generates tokens "Ankara r", "nkara ro", "kara roc", and so on. We then use AES to encrypt these tokens, and further obscure them by MD5 hashing, as shown in \autoref{lst:tokenize}. This overall encryption scheme is different then the proposed DPIEnc encryption by Sherry et al., yet still carries the same privacy characteristic since the resulting ciphertext cannot be decrypted.
+Our naive BlindBox implementation is based on the Basic Detection Protocol explained in Section \ref{maincontributions}. As described by the main BlindBox paper, we first use a sliding window technique in order to create 8-byte long tokens of a given message that is being transferred to the receiving client. For example, if the message is "Ankara rocks!", the sending client generates tokens "Ankara r", "nkara ro", "kara roc", and so on. We then use AES to encrypt these tokens, and further obscure them by MD5 hashing, as shown in \autoref{lst:tokenize}. This overall encryption scheme is different then the proposed DPIEnc encryption by Sherry et al., yet still carries the same privacy characteristic since the resulting ciphertext cannot be decrypted.
 
 \begin{lstlisting}[caption={Tokenization},label={lst:tokenize},language=Python]
 from Crypto.Cipher import AES
@@ -288,7 +297,7 @@ Validating session
 Got a VALID TCP packet with payload "This is a safe message."
 \end{lstlisting}
 
-Similarly, when a payload with a malicious content is given, sending client sends out all BlindBox packets per usual. But as explained in Section \ref{methodology}, the middlebox would drop the packets that matches a malicious-identifiying token. Hence, the receiving client can identify the given payload as malicious, as shown in \autoref{lst:resultmalicious}.
+Similarly, when a payload with a malicious content is given, sending client sends out all BlindBox packets per usual. But as explained in Section \ref{methodology}, the middlebox would drop the packets that matches a malicious-identifying token. Hence, the receiving client can identify the given payload as malicious, as shown in \autoref{lst:resultmalicious}.
 
 \begin{lstlisting}[caption={A Malicious Message},label={lst:resultmalicious},language=bash]
 # At ``Node: h1'' Xterm window
@@ -334,7 +343,7 @@ Got a MALICIOUS TCP packet with payload "This is a MALICIOUS message."
 
 BlindBox is the first ever system that enables DPI over encrypted traffic without decrypting the underlying data. It is also claimed to be competitively performant as other Intrusion Detection Systems (IDS). But BlindBox is far from being perfect. It requires both parties to be aware of the protocol as the implementation requires a tokenizer on sender and a validator on receiver. That requirement makes it unfit for certain middlebox applications where either the sender or the receiver is not aware of the protocol.
 
-In our naive implementation of BlindBox, we share all of the limitations and the strengths discussed by Sheery et al. at their original work \cite{Blindbox}. We do have some further limitations because of the naivety of our execution. 
+In our naive implementation of BlindBox, we share all of the limitations and the strengths discussed by Sherry et al. at their original work \cite{Blindbox}. We do have some further limitations because of the naivety of our execution. 
 
 First and foremost, our rule detection implementation at the middlebox is only able to detect rules that are between 8 to 15 bytes. For anything longer than that, we'd need to have a more sophisticated implementation where the session information is stored at the middlebox so that multiple BlindBox token packets in sequence can be matched against the rules. The middlebox implementation can also be augmented by allowing it to rely on a dynamic table idea where the generated rules can be fed into the middlebox after the fact. Right now, the rules are hardcoded into the middlebox code at its \emph{ingress} implementation, as shown in \autoref{lst:blindboxingress}.
 
